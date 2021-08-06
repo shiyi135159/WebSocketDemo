@@ -1,0 +1,84 @@
+<!--
+ * @Description  : WebSocket Client
+ * @Author       : Paddy Zhang
+ * @Date         : 2021-08-05 14:10:02
+ * @LastEditors  : Paddy Zhang
+ * @LastEditTime : 2021-08-05 16:35:16
+ * @FilePath     : \src\client\client.html
+-->
+<html>
+<header>
+    <title>WebSocket Client</title>
+</header>
+
+<body>
+    <div>
+        <label>IP地址：</label>
+        <input type="text" id="ip" />
+        <input type="button" id="link" value="连接" />
+        <label id="status" style="color: #FF5722;">未连接</label>
+    </div>
+    <div style="margin-top: 10px;">
+        <label style="letter-spacing: 0.3rem;">信息：</label>
+        <input type="text" id="msg" />
+        <input type="button" id="send" value="发送" />
+    </div>
+</body>
+<script src="jquery.min.js"></script>
+<script type="text/javascript">
+    let ws;
+    $('#link').on('click', () => {
+        let ip = $('#ip').val();
+        if (ip == '') {
+            alert('IP地址未填写！');
+            return;
+        }
+        $('#ip').attr('disabled', true);
+        $('#link').attr('disabled', true);
+        $('#link').val('正在连接..');
+        if (ws != undefined) {
+            ws.close();
+        }
+        ws = new WebSocket('ws://' + ip + ':8000');
+        ws.onopen = function (evt) {
+            console.log('Connect successful.');
+            $('#status').text('已连接');
+            $('#status').css('color', '#5FB878');
+            $('#link').val('已连接');
+            // ws.send('hello!');
+        };
+        ws.onmessage = function (evt) {
+            console.log("Received Message: " + evt.data);
+            if (evt.data == 'print') {
+                window.print();
+            }
+            // ws.close();
+        };
+        ws.onclose = function (evt) {
+            console.log("Connection closed.");
+            $('#status').text('未连接');
+            $('#status').css('color', '#FF5722');
+            $('#ip').attr('disabled', false);
+            $('#link').attr('disabled', false);
+            $('#link').val('连接');
+        };
+        // ws.onerror = function (evt) {
+        //     // handle error event
+        //     console.log("Something went error:", evt.target.readyState);
+        // };
+    });
+    $('#send').on('click', () => {
+        if (ws == undefined) {
+            alert('终端未连接！');
+            return;
+        }
+        let msg = $('#msg').val();
+        if (msg == '') {
+            alert('发送内容为空！');
+            return;
+        }
+        ws.send(msg);
+    });
+</script>
+
+</html>
